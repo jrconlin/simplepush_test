@@ -112,7 +112,7 @@ class TestNotify(PushTestCase):
 
                 send_ack(ws, ret["updates"])
                 ws.state="purge"
-                self.msg(ws, {"messageType": "purge"})
+                self.msg(ws, {"messageType": "purge"}, cb=False)
 
         def on_open(ws):
             self.log('open:', ws)
@@ -130,7 +130,7 @@ class TestNotify(PushTestCase):
                       "channelIDs": [],
                       "uaid": self.uaid},
                      cb=False)
-            self.msg(ws, {"messageType": "purge"})
+            self.msg(ws, {"messageType": "purge"}, cb=False)
 
         def reg_chan(ws, state, chan_str):
             ws.state = state
@@ -152,7 +152,6 @@ class TestNotify(PushTestCase):
         def send_update(update_url, str_data, state='update1',
                         ct='application/x-www-form-urlencoded'):
             if update_url == '':
-                import pdb; pdb.set_trace()
                 raise AssertionError("No update_url found")
             ws.state = state
             resp = send_http_put(update_url, str_data, ct, True)

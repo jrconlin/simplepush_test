@@ -48,6 +48,8 @@ class PushTestCase(unittest.TestCase):
         if cb:
             try:
                 ret = ws.recv()
+                if ret is None or len(ret) == 0:
+                    return None
                 return json.loads(ret)
             except Exception, e:
                 print '#### Unable to parse json:', e

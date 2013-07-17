@@ -7,6 +7,7 @@
 import json
 import unittest
 import websocket
+import signal
 
 from pushtest.pushTestCase import PushTestCase
 from pushtest.utils import (get_uaid, str_gen, send_http_put)
@@ -230,6 +231,39 @@ class TestPushAPI(PushTestCase):
         self.compare_dict(ret, {"messageType": "unregister",
                           "status": 200})
         self.msg(self.ws, {"messageType": "purge"})
+
+    def test_unreg_race(self):
+        """ Test Unregister with outstanding unACKed notifications
+            https://bugzilla.mozilla.org/show_bug.cgi?id=894193
+        """
+        class TimeoutError(Exception):
+            pass
+
+        def _timeout(signum, frame):
+            raise TimeoutError()
+
+        self.msg(self.ws, {"messageType": "hello",
+                 "channelIDs": [],
+                 "uaid": "unreg_race"})
+        ret = self.msg(self.ws, {"messageType": "register",
+                       "channelID": "unreg_race"})
+        send_http_put(ret["pushEndpoint"])
+        try:
+            # read the update, but don't ACK it.
+            self.ws.recv()
+            # unregister the channel
+            self.msg(self.ws, {"messageType": "unregister",
+                               "channelID": "unreg_race"})
+            # make sure we don't get any updates.
+            # They should be immediate.
+            signal.signal(signal.SIGALRM, _timeout)
+            signal.alarm(1)
+            self.ws.recv()
+            raise AssertionError("ACK of unregistered channel data requested")
+        except TimeoutError, e:
+            pass
+        except Exception, e:
+            raise AssertionError(e)
 
     def test_ping(self):
         # Ping responses can contain any data.
