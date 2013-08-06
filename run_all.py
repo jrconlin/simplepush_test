@@ -6,6 +6,7 @@
 
 import unittest
 import os
+import sys
 from optparse import OptionParser
 from unittest import TestSuite
 
@@ -22,4 +23,6 @@ if __name__ == '__main__':
         pattern = pattern.split("/")[1]
     tests = unittest.defaultTestLoader.discover('.', pattern=pattern)
     suite.addTests(tests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(failfast=1,verbosity=2).run(suite)
+    if not result.wasSuccessful():
+        sys.exit(-1)
