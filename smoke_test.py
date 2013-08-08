@@ -5,6 +5,7 @@ import ConfigParser
 import httplib
 import urlparse
 import pprint
+import sys
 
 appid = "test1"
 version = ""
@@ -199,10 +200,15 @@ def main():
     ws.run_forever()
     print("leaving")
     print "=============="
+    result = True
     if ws.success:
         print "Smoke test was successful"
     else:
         print "Smoke test failed."
+        result = False;
     print "=============="
+
+    if not result:
+        sys.exit(-1)
 
 main()
