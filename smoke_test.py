@@ -7,7 +7,9 @@ import urlparse
 import pprint
 import sys
 
-appid = "test1"
+
+chid = "deadbeef-0000-0000-0000-000000000000"
+uaid = "decafbad-0000-0000-0000-000000000000"
 version = ""
 success = False
 
@@ -58,14 +60,14 @@ def on_message(ws, message):
     if ws.state == "helloagain":
         # retry the registration
         ws.state = "register"
-        ws.send(json.dumps({"messageType": ws.state, "channelID": ws.appid}))
+        ws.send(json.dumps({"messageType": ws.state, "channelID": ws.chid}))
         return
     if ws.state == "hello":
-        ## We're recognized, try to register the appid channel.
+        ## We're recognized, try to register the chid channel.
         ## NOTE: Normally, channelIDs are UUID4 type values.
         check_hello(msg)
         ws.state = "register"
-        ws.send(json.dumps({"messageType": ws.state, "channelID": ws.appid}))
+        ws.send(json.dumps({"messageType": ws.state, "channelID": ws.chid}))
         return
     if ws.state == "register":
         ## Endpoint is registered. Send an update via the REST interface.
@@ -121,12 +123,12 @@ def state_machine(ws):
     ws.state = "hello"
     print ">>> Sending 'Hello'"
     ws.send(json.dumps({"messageType": ws.state,
-            "uaid": "test", "channelIDs": []}))
+            "uaid": uaid, "channelIDs": []}))
 
 
 def check_hello(msg):
     try:
-        assert(msg.get("uaid") == "test", "did not echo UAID")
+        assert(msg.get("uaid") == uaid, "did not echo UAID")
     except AssertionError, e:
         print e
         exit("Hello failed check")
@@ -135,7 +137,7 @@ def check_hello(msg):
 
 def check_update(msg, ws):
     try:
-        assert(msg.get("updates")[0].get("channelID") == ws.appid,
+        assert(msg.get("updates")[0].get("channelID") == ws.chid,
                "does not contain channelID")
         if len(ws.version):
             assert(msg.get("updates")[0].get("version") == ws.version,
@@ -171,7 +173,7 @@ def send_rest_alert(ws):
 
 def send_unreg(ws):
     print ">>> Sending Unreg"
-    ws.send(json.dumps({"messageType": "unregister", "channelID": appid}))
+    ws.send(json.dumps({"messageType": "unregister", "channelID": chid}))
 
 
 def send_ack(ws, msg):
@@ -194,7 +196,7 @@ def main():
                                 on_error=on_error,
                                 on_close=on_close)
     ws.state = "initialize"
-    ws.appid = appid
+    ws.chid = chid
     ws.version = version
     ws.success = False
     ws.run_forever()
