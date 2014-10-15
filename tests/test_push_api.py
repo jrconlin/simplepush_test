@@ -10,7 +10,7 @@ import websocket
 import signal
 
 from pushtest.pushTestCase import PushTestCase
-from pushtest.utils import (get_uaid, str_gen, send_http_put)
+from pushtest.utils import (get_uaid, str_gen, send_http_put, log)
 
 ## Note: The protocol notes that a re-registration with the same
 #  channel number should return a 409. This can cause problems

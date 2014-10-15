@@ -2,13 +2,12 @@
 import ConfigParser
 import json
 import unittest
-from utils import (str_gen, str2bool, print_log, comp_dict)
+from utils import (str_gen, str2bool, log as print_log, compare_dict as comp_dict, read_config)
 
 
 class PushTestCase(unittest.TestCase):
     """ General API tests """
-    config = ConfigParser.ConfigParser()
-    config.read('../config.ini')
+    config = read_config('../config.ini')
     url = config.get('server', 'url')
     debug = str2bool(config.get('debug', 'trace'))
     verbose = str2bool(config.get('debug', 'verbose'))

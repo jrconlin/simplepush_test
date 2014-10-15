@@ -1,12 +1,13 @@
 import websocket
 
 import json
-import ConfigParser
+
 import httplib
 import urlparse
 import pprint
 import sys
 
+from pushtest.utils import read_config
 
 chid = "deadbeef-0000-0000-0000-000000000000"
 uaid = "decafbad-0000-0000-0000-000000000000"
@@ -187,8 +188,7 @@ def send_ack(ws, msg):
 
 
 def main():
-    config = ConfigParser.ConfigParser()
-    config.read('config.ini')
+    config = read_config('config.ini')
 
     url = config.get('server', 'url')
 
