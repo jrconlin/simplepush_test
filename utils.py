@@ -6,7 +6,7 @@ import urllib2
 epoch = int(time.time())
 
 
-def str_gen(size=6, chars=string.ascii_uppercase + string.digits):
+def str_gen(size=6, chars="ABCDEF" + string.digits):
     #generate rand string
     return ''.join(random.choice(chars) for x in range(size))
 

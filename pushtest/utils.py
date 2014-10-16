@@ -18,7 +18,7 @@ def print_log(prefix, msg):
 
 def get_uaid(chan_str):
     """uniquify our channels so there's no collision"""
-    return "%s%s" % (chan_str, str_gen(16))
+    return str_gen(32, 'ABCDEF'+string.digits)
 
 
 def send_http_put(update_path, args='version=123',

@@ -19,10 +19,11 @@ class TestPushAPI(PushTestCase):
         self.ws = websocket.create_connection(self.url)
 
     def test_key_case(self):
+        test_chid = get_uaid("key_case")
         """ Test key case sensitivity """
         self.ws = websocket.create_connection(self.url)
         ret = self.msg(self.ws, {"messagetype": "hello",
-                       "channelIDs": ["CASE_UAID"],
+                       "channelIDs": [test_chid],
                        "uaid": get_uaid("CASE_UAID")})
         self.compare_dict(ret, {"status": 401,
                           "error": "Invalid Command"})
@@ -32,7 +33,7 @@ class TestPushAPI(PushTestCase):
         # leading trailing spaces
         self.ws = websocket.create_connection(self.url)
         ret = self.msg(self.ws, {" messageType ": "hello",
-                       "channelIDs": ["CASE_UAID"],
+                       "channelIDs": [test_chid],
                        "uaid": get_uaid("CASE_UAID")})
         self.compare_dict(ret, {'status': 401, 'error': 'Invalid Command'})
         self.msg(self.ws, {"messageType": "purge"})
@@ -41,7 +42,7 @@ class TestPushAPI(PushTestCase):
         # Cap channelIds
         self.ws = websocket.create_connection(self.url)
         ret = self.msg(self.ws, {"messageType": "hello",
-                       "ChannelIds": ["CASE_UAID"],
+                       "ChannelIds": [test_chid],
                        "uaid": get_uaid("CASE_UAID")})
         self.compare_dict(ret, {'status': 401, 'error': 'Invalid Command'})
         self.msg(self.ws, {"messageType": "purge"})
@@ -50,7 +51,7 @@ class TestPushAPI(PushTestCase):
         # all cap hello
         self.ws = websocket.create_connection(self.url)
         ret = self.msg(self.ws, {"messageType": "HELLO",
-                       "channelIDs": ["CASE_UAID"],
+                       "channelIDs": ["test_chid"],
                        "uaid": get_uaid("CASE_UAID")})
         self.compare_dict(ret, {'status': 200, "messageType": "hello"})
         self.msg(self.ws, {"messageType": "purge"})
@@ -60,30 +61,31 @@ class TestPushAPI(PushTestCase):
         self.ws = websocket.create_connection(self.url)
         uaid = get_uaid("CASE_UAID")
         self.msg(self.ws, {"messageType": "hello",
-                 "channelIDs": ["CASE_UAID"],
+                 "channelIDs": [test_chid],
                  "uaid": get_uaid("CASE_UAID")})
         ret = self.msg(self.ws, {"messageType": "registeR",
-                       "channelIDs": ["CASE_UAID"],
+                       "channelIDs": [test_chid],
                        "uaiD": uaid})
         self.compare_dict(ret, {'status': 401, 'error': 'Invalid Command'})
 
         # test ack
         self.msg(self.ws, {"messageType": "acK",
-                 "channelIDs": ["CASE_UAID"],
+                 "channelIDs": [test_chid],
                  "uaid": uaid})
         self.compare_dict(ret, {'status': 401, 'error': 'Invalid Command'})
 
         # test ping
         self.msg(self.ws, {"messageType": "PING",
-                 "channelIDs": ["CASE_UAID"],
+                 "channelIDs": [test_chid],
                  "uaid": uaid})
         self.compare_dict(ret, {'status': 401, 'error': 'Invalid Command'})
         self.msg(self.ws, {"messageType": "purge"})
 
     def test_empty_args(self):
         uaid = get_uaid("empty_uaid")
+        test_chid = get_uaid("")
         ret = self.msg(self.ws, {"messageType": "",
-                       "channelIDs": ["CASE_UAID"],
+                       "channelIDs": [test_chid],
                        "uaid": uaid})
         self.compare_dict(ret, {'status': 401, 'error': 'Invalid Command'})
         self.msg(self.ws, {"messageType": "purge"})
@@ -112,7 +114,7 @@ class TestPushAPI(PushTestCase):
                  "uaid": uaid})
 
         ret = self.msg(self.ws, {"messageType": "register",
-                       "channelID": "EMPTY_ARG",
+                       "channelID": test_chid,
                        "uaid": ""})
         self.compare_dict(ret, {'status': 200, 'messageType': 'register'})
         self.validate_endpoint(ret['pushEndpoint'])
@@ -131,9 +133,10 @@ class TestPushAPI(PushTestCase):
 
     def test_chan_limits(self):
         """ Test string limits for keys """
+        import pdb; pdb.set_trace()
         uaid = get_uaid("chan_limit_uaid")
         self.msg(self.ws, {"messageType": "hello",
-                 "channelIDs": ["chan_limits"],
+                 "channelIDs": [get_uaid("chan_limits")],
                  "uaid": uaid})
         ret = self.msg(self.ws, {"messageType": "register",
                        "channelID": "%s" % self.chan_150[:101]})

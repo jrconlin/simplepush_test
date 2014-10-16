@@ -20,7 +20,7 @@ class PushTestCase(unittest.TestCase):
             '14a84c48-2b8c-4669-8976--541368ccf4d3']
     big_uuid = uuid * 100
 
-    chan_150 = str_gen(150)
+    chan_150 = str_gen(150, 'abcdef0123456789')
     strings = ['', 'valid_uaid', ' fooey barrey ',
                '!@#$%^&*()-+', '0', '1', '-66000', uuid[0],
                'True', 'False', 'true', 'false',
