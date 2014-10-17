@@ -55,12 +55,12 @@ class TestNotify(PushTestCase):
             self.log('state', ws.state)
 
             if ws.state == 'hello':
-                reg_chan(ws, 'register1', 'tn_chan1')
+                reg_chan(ws, 'register1', self.chan1_id)
             elif ws.state == 'register1':
                 # register chan1
                 self.chan1 = ret.get("pushEndpoint")
                 self.log('self.chan1', self.chan1)
-                reg_chan(ws, 'register2', 'tn_chan2')
+                reg_chan(ws, 'register2', self.chan2_id)
             elif ws.state == 'register2':
                 # register chan2
                 self.chan2 = ret.get("pushEndpoint")
@@ -120,10 +120,10 @@ class TestNotify(PushTestCase):
             self.log('open:', ws)
             setup_chan(ws)
 
-        def on_error(ws):
+        def on_error(ws, error):
             self.log('on error')
             ws.close()
-            raise AssertionError(ws)
+            raise AssertionError(error)
 
         def setup_chan(ws):
             ws.state = 'hello'
