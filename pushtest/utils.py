@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import binascii
 import string
 import random
 import time
@@ -11,24 +12,25 @@ import os
 
 epoch = int(time.time())
 
+
+def env_override(config, env_name, section, name):
+    default = None
+    if config.has_section(section):
+        default = config.get(section, name)
+    else:
+        config.add_section(section)
+    config.set(section, name, os.getenv(env_name, default))
+
 def read_config(*filenames):
     config = ConfigParser.ConfigParser()
     config.read(*filenames)
 
-    if not config.has_section('server'):
-        config.add_section('server')
+    env_override(config, 'TEST_URL', 'server', 'url')
+    env_override(config, 'TEST_DUPES', 'server', 'allow_dupes')
+    env_override(config, 'TEST_CASE_SENSITIVE', 'server', 'case_sensitive_keys')
 
-    default_url = config.get('server', 'url')
-    config.set('server', 'url', os.getenv('TEST_URL', default_url))
-
-    if not config.has_section('debug'):
-        config.add_section('debug')
-
-    default_trace = config.get('debug', 'trace')
-    config.set('debug', 'trace', os.getenv('TEST_TRACE', default_trace))
-
-    default_verbose = config.get('debug', 'verbose')
-    config.set('debug', 'verbose', os.getenv('TEST_VERBOSE', default_verbose))
+    env_override(config, 'TEST_TRACE', 'debug', 'trace')
+    env_override(config, 'TEST_VERBOSE', 'debug', 'verbose')
 
     return config
 
@@ -39,7 +41,7 @@ def str_gen(size=6, chars=string.ascii_uppercase + string.digits):
 
 
 def str2bool(v):
-    return v.lower() in ("true", "1")
+    return v in ("1", "t", "T", "true", "TRUE", "True")
 
 
 def log(prefix, msg):
