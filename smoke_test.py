@@ -1,12 +1,13 @@
 import websocket
 
 import json
-import ConfigParser
+
 import httplib
 import urlparse
 import pprint
 import sys
 
+from pushtest.utils import read_config
 
 chid = "deadbeef-0000-0000-0000-000000000000"
 uaid = "decafbad-0000-0000-0000-000000000000"
@@ -128,7 +129,7 @@ def state_machine(ws):
 
 def check_hello(msg):
     try:
-        assert(msg.get("uaid") == uaid, "did not echo UAID")
+        assert msg.get("uaid") == uaid
     except AssertionError, e:
         print e
         exit("Hello failed check")
@@ -137,11 +138,9 @@ def check_hello(msg):
 
 def check_update(msg, ws):
     try:
-        assert(msg.get("updates")[0].get("channelID") == ws.chid,
-               "does not contain channelID")
+        assert msg.get("updates")[0].get("channelID") == ws.chid
         if len(ws.version):
-            assert(msg.get("updates")[0].get("version") == ws.version,
-                   "does not contain correct version")
+            assert msg.get("updates")[0].get("version") == ws.version
     except AssertionError, e:
         print e
         exit("Update failed check")
@@ -150,8 +149,8 @@ def check_update(msg, ws):
 
 def check_register(msg):
     try:
-        assert(msg.get("pushEndpoint") is not None, "Missing pushEndpoint")
-        assert(msg.get("channelID") is not None, "Missing channelID")
+        assert msg.get("pushEndpoint") is not None
+        assert msg.get("channelID") is not None
     except AssertionError, e:
         print e
         exit("Register Failed")
@@ -187,8 +186,7 @@ def send_ack(ws, msg):
 
 
 def main():
-    config = ConfigParser.ConfigParser()
-    config.read('config.ini')
+    config = read_config('config.ini')
 
     url = config.get('server', 'url')
 

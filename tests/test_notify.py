@@ -19,9 +19,11 @@ class TestNotify(PushTestCase):
             websocket.enableTrace(True)
 
     def test_two_chan(self):
+        self.uaid = get_uaid()
+        self.chan1_id = get_uaid()
         self.chan1 = ""
+        self.chan2_id = get_uaid()
         self.chan2 = ""
-        self.uaid = get_uaid('notify')
 
         def on_close(ws):
             self.log('on_close:')
@@ -34,9 +36,9 @@ class TestNotify(PushTestCase):
 
         def _check_updates(updates_list, chan1_val="", chan2_val=""):
             for chan in updates_list:
-                if chan1_val != "" and chan["channelID"] == "tn.chan1":
+                if chan1_val != "" and chan["channelID"] == self.chan1_id:
                     _assert_equal(chan["version"], chan1_val)
-                if chan2_val != "" and chan["channelID"] == "tn.chan2":
+                if chan2_val != "" and chan["channelID"] == self.chan2_id:
                     _assert_equal(chan["version"], chan2_val)
 
             return
@@ -53,12 +55,12 @@ class TestNotify(PushTestCase):
             self.log('state', ws.state)
 
             if ws.state == 'hello':
-                reg_chan(ws, 'register1', 'tn_chan1')
+                reg_chan(ws, 'register1', self.chan1_id)
             elif ws.state == 'register1':
                 # register chan1
                 self.chan1 = ret.get("pushEndpoint")
                 self.log('self.chan1', self.chan1)
-                reg_chan(ws, 'register2', 'tn_chan2')
+                reg_chan(ws, 'register2', self.chan2_id)
             elif ws.state == 'register2':
                 # register chan2
                 self.chan2 = ret.get("pushEndpoint")
@@ -68,7 +70,7 @@ class TestNotify(PushTestCase):
             elif ws.state == 'update1':
                 #verify chan1
                 self.compare_dict(ret, {"messageType": "notification"}, True)
-                _assert_equal(ret["updates"][0]["channelID"], "tn_chan1")
+                _assert_equal(ret["updates"][0]["channelID"], self.chan1_id)
                 _check_updates(ret["updates"], 12345789)
 
                 # http put to chan2
@@ -93,7 +95,7 @@ class TestNotify(PushTestCase):
                 # update the same channel
                 self.compare_dict(ret, {"messageType": "notification"}, True)
                 for chan in ret["updates"]:
-                    if chan["channelID"] == "tn.chan2":
+                    if chan["channelID"] == self.chan2_id:
                         # check if 0 version returns epoch
                         _assert_equal(len(str(chan["version"])), 10)
 
@@ -106,7 +108,7 @@ class TestNotify(PushTestCase):
                 # update the same channel
                 self.compare_dict(ret, {"messageType": "notification"}, True)
                 for chan in ret["updates"]:
-                    if chan["channelID"] == "tn.chan1":
+                    if chan["channelID"] == self.chan1_id:
                         # check if 0 version returns epoch
                         _assert_equal(len(str(chan["version"])), 10)
 
@@ -118,10 +120,10 @@ class TestNotify(PushTestCase):
             self.log('open:', ws)
             setup_chan(ws)
 
-        def on_error(ws):
+        def on_error(ws, error):
             self.log('on error')
             ws.close()
-            raise AssertionError(ws)
+            raise AssertionError(error)
 
         def setup_chan(ws):
             ws.state = 'hello'
