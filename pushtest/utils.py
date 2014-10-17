@@ -10,8 +10,6 @@ import urllib2
 import ConfigParser
 import os
 
-epoch = int(time.time())
-
 
 def env_override(config, env_name, section, name):
     default = None
@@ -35,9 +33,14 @@ def read_config(*filenames):
     return config
 
 
-def str_gen(size=6, chars=string.ascii_uppercase + string.digits):
-    #generate rand string
-    return ''.join(random.choice(chars) for x in range(size))
+def str_gen(size=6):
+    """ Generates a random hex-encoded string """
+    return binascii.hexlify(os.urandom(size))
+
+
+def get_uaid():
+    """ Generate a 16-byte hex-encoded string """
+    return str_gen(16)
 
 
 def str2bool(v):
@@ -46,16 +49,6 @@ def str2bool(v):
 
 def log(prefix, msg):
     print "::%s: %s" % (prefix, msg)
-
-
-def get_uaid(chan_str):
-    """uniquify our channels so there's no collision"""
-    return "%s%s" % (chan_str, str_gen(16))
-
-
-def add_epoch(chan_str):
-    """uniquify our channels so there's no collision"""
-    return "%s%s" % (chan_str, epoch)
 
 
 def send_http_put(update_path, args='version=123',

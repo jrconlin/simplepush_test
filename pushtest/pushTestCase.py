@@ -13,20 +13,46 @@ class PushTestCase(unittest.TestCase):
     debug = str2bool(config.get('debug', 'trace'))
     verbose = str2bool(config.get('debug', 'verbose'))
 
+    ## Note: The protocol notes that a re-registration with the same
+    #  channel number should return a 409. This can cause problems
+    #  for large servers, since it requires the server to maintain
+    #  states for each uaid+channel pair. These tests are commented
+    #  out until we can either detect the type of server we're running
+    #  against, or otherwise resolve the issue.
+    allow_dupes = str2bool(config.get('server', 'allow_dupes'))
+
+    # JSON object keys are case-sensitive by default; however, Go's JSON
+    # decoder accepts case-insensitive matches. This is a PushGo-specific
+    # behavior that is not guaranteed across implementations.
+    case_sensitive_keys = str2bool(config.get('server', 'case_sensitive_keys'))
+
     # data types
     uuid = ['f7067d44-5893-407c-8d4c-fc8f7ed97041',
-            '1c57e340-df59-44648105-b91f1a39608b',
-            '0cb8a613-8e2b-4b47-b370-51098daa8401',
-            '14a84c48-2b8c-4669-8976--541368ccf4d3']
+            '0cb8a613-8e2b-4b47-b370-51098daa8401']
+
+    invalid_uuid = ['1c57e340-df59-44648105-b91f1a39608b',
+                    '14a84c48-2b8c-4669-8976--541368ccf4d3']
+
     big_uuid = uuid * 100
 
-    chan_150 = str_gen(150)
-    strings = ['', 'valid_uaid', ' fooey barrey ',
-               '!@#$%^&*()-+', '0', '1', '-66000', uuid[0],
-               'True', 'False', 'true', 'false',
-               '\"foo bar\"', str_gen(64000)]
+    strings = {
+        'valid_uaid': {'status': 503},
+        ' fooey barrey ': {'status': 503},
+        '!@#$%^&*()-+': {'status': 503},
+        '0': {'status': 503},
+        '1': {'status': 503},
+        '-66000': {'status': 503},
+        uuid[0]: {'status': 200, 'uaid': uuid[0]},
+        invalid_uuid[1]: {'status': 503},
+        'True': {'status': 503},
+        'False': {'status': 503},
+        'true': {'status': 503},
+        'false': {'status': 503},
+        '\"foo bar\"': {'status': 503},
+        str_gen(64000): {'status': 503}
+    }
     data_types = ['messageType', 'HeLLO', '!@#$%^&*()-+', '0',
-                  '1', '-66000', '',
+                  '1', '-66000', '', uuid[1],
                   1, 0, -1, True, False, None, ' fooey barrey ',
                   str_gen(64000), chr(0), '\x01\x00\x12\x59']
 
