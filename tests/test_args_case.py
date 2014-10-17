@@ -161,8 +161,7 @@ class TestPushAPI(PushTestCase):
             self.validate_endpoint(ret['pushEndpoint'])
 
     def tearDown(self):
-        self.msg(self.ws, {"messageType": "purge"})
-        self.ws.close()
+        self.close(self.ws)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

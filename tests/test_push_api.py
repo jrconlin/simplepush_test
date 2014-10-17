@@ -353,8 +353,7 @@ class TestPushAPI(PushTestCase):
         self.assertEqual(ret["updates"][0]["channelID"], "ack_chan_1")
 
     def tearDown(self):
-        self.msg(self.ws, {"messageType": "purge"})
-        self.ws.close()
+        self.close(self.ws)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

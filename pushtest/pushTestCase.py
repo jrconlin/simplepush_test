@@ -2,6 +2,7 @@
 import ConfigParser
 import json
 import unittest
+import socket
 from utils import (str_gen, str2bool, log as print_log, compare_dict as comp_dict, read_config)
 
 
@@ -35,6 +36,15 @@ class PushTestCase(unittest.TestCase):
     def log(self, prefix, msg=""):
         if self.verbose:
             print_log(prefix, msg)
+
+    def close(self, ws):
+        try:
+            ws.send('{"messageType": "purge"}')
+        except socket.error, e:
+            # If the server closed the connection, e[0] == errno.EPIPE.
+            pass
+        finally:
+            ws.close()
 
     def msg(self, ws, msg, cb='cb'):
         """ Util that sends and returns dict"""
