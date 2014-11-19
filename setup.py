@@ -27,7 +27,7 @@ setup(name=PROJECT,
       author_email='jrconlin@mozilla.com',
       url='https://wiki.mozilla.org/WebAPI/SimplePush',
       packages=find_packages(),
-      install_requires=["nose>=1.3.4"]
+      install_requires=["nose>=1.3.4"],
       include_package_data=True,
       zip_safe=False,
 )
