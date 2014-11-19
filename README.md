@@ -5,9 +5,15 @@ This test harness is designed to exercise the server functions.
 ## Server API Testing
 Run `make` to install dependencies.
 
-You can run smoke tests invoking `python main.py`
+You can run the complete smoke tests invoking
+`PUSH_SERVER=wss://WEBSOCKETHOST/ make test`. These tests exercise basic
+delivery and uaid reconnect resumption behavior along with storage of
+notifications while disconnected.
 
-You can also acceptance level tests by invoking `./run_all.py`. You
+To run the tests not requiring storage, invoke:
+`PUSH_SERVER=wss://WEBSOCKETHOST/ ./bin/nosetests test_loop`.
+
+You can also run acceptance level tests by invoking `./run_all.py`. You
 can run a specific test file by passing the filename as an argument.
 Debug output is controlled by config.ini.
 
