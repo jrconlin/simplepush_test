@@ -1,8 +1,8 @@
-APPNAME = pushgo_test
+APPNAME = pushgotest
 VE = virtualenv
 PY = bin/python
 PI = bin/pip
-NO = bin/nosetests -s --with-xunit
+NO = bin/nosetests
 NC = --with-coverage --cover-package=$(APPNAME)
 PS = bin/pserve
 
@@ -15,7 +15,7 @@ build:
 	$(PY) setup.py develop
 
 test:
-	$(NO) $(APPNAME)
+	@$(NO)
 
 run:
 	$(PY) main.py
