@@ -161,13 +161,9 @@ def check_register(msg):
 def send_rest_alert(ws):
     print ">>> Sending REST update"
     url = urlparse.urlparse(ws.update_url)
-    http = None
-    if url.scheme == "https":
-        http = httplib.HTTPSConnection(url.netloc)
-    else:
-        http = httplib.HTTPConnection(url.netloc)
+    http = httplib.HTTPConnection(url.netloc)
     http.set_debuglevel(10)
-    http.request("PUT", url.path, "version=" + version)
+    http.request("PUT", url.path + "?version=" + version)
     print "#>> "
     resp = http.getresponse()
     if resp.status != 200:
