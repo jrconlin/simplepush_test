@@ -59,6 +59,15 @@ class Client(object):
         eq_(result["status"], 200)
         eq_(result["channelID"], chid)
         self.channels[chid] = result["pushEndpoint"]
+        return result
+
+    def unregister(self, chid):
+        msg = json.dumps(dict(messageType="unregister", channelID=chid))
+        log.debug("Send: %s", msg)
+        self.ws.send(msg)
+        result = json.loads(self.ws.recv())
+        log.debug("Recv: %s", result)
+        return result
 
     def send_notification(self, channel=None, version=None):
         if not self.channels:
@@ -101,8 +110,10 @@ class Client(object):
         log.debug("Recv: %s", result)
         eq_(result, "{}")
 
-    def ack(self, channel):
-        pass
+    def ack(self, channel, version):
+        msg = json.dumps(dict(messageType="ack", updates=[dict(channelID=channel, version=version)]))
+        log.debug("Send: %s", msg)
+        self.ws.send(msg)
 
     def disconnect(self):
         self.ws.send_close()
