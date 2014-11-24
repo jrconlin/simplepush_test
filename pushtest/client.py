@@ -109,6 +109,7 @@ class Client(object):
         result = self.ws.recv()
         log.debug("Recv: %s", result)
         eq_(result, "{}")
+        return result
 
     def ack(self, channel, version):
         msg = json.dumps(dict(messageType="ack", updates=[dict(channelID=channel, version=version)]))

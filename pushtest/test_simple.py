@@ -25,6 +25,7 @@ def test_delivery_while_disconnected(url=None):
     ok_(result["updates"] > 0)
     eq_(result["updates"][0]["channelID"], chan)
 
+
 def test_delivery_repeat_without_ack(url=None):
     url = url or check_environ()
     client = quick_register(url)
@@ -47,6 +48,7 @@ def test_delivery_repeat_without_ack(url=None):
     ok_(result["updates"] > 0)
     eq_(result["updates"][0]["channelID"], chan)
 
+
 def test_dont_deliver_acked(url=None):
     url = url or check_environ()
     client = quick_register(url)
@@ -65,6 +67,7 @@ def test_dont_deliver_acked(url=None):
     client.hello()
     result = client.get_notification()
     eq_(result, {})
+
 
 def test_no_delivery_to_unregistered(url=None):
     url = url or check_environ()

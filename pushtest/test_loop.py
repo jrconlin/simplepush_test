@@ -19,6 +19,12 @@ def test_basic_deliver(url=None):
     ok_(result != {})
 
 
+def test_can_ping(url=None):
+    url = url or check_environ()
+    client = quick_register(url)
+    client.ping()
+
+
 def test_uaid_resumption_on_reconnect(url=None):
     url = url or check_environ()
     client = quick_register(url)
