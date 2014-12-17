@@ -66,7 +66,7 @@ def test_dont_deliver_acked(url=None):
     client.connect()
     client.hello()
     result = client.get_notification()
-    eq_(result, {})
+    eq_(result, None)
 
 
 def test_no_delivery_to_unregistered(url=None):
@@ -86,4 +86,20 @@ def test_no_delivery_to_unregistered(url=None):
     client.connect()
     client.hello()
     result = client.get_notification()
-    eq_(result, {})
+    eq_(result, None)
+
+
+def test_deliver_version(url=None):
+    url = url or check_environ()
+    client = quick_register(url)
+    result = client.send_notification(version=12)
+    ok_(result is not None)
+    eq_(result["updates"][0]["version"], 12)
+
+
+def test_deliver_version_without_header(url=None):
+    url = url or check_environ()
+    client = quick_register(url)
+    result = client.send_notification(version=12, use_header=False)
+    ok_(result is not None)
+    eq_(result["updates"][0]["version"], 12)

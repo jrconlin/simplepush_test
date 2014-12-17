@@ -69,7 +69,8 @@ class Client(object):
         log.debug("Recv: %s", result)
         return result
 
-    def send_notification(self, channel=None, version=None):
+    def send_notification(self, channel=None, version=None, data=None,
+                          use_header=True):
         if not self.channels:
             raise Exception("No channels registered.")
 
@@ -86,7 +87,19 @@ class Client(object):
             http = httplib.HTTPSConnection(url.netloc)
         else:
             http = httplib.HTTPConnection(url.netloc)
-        http.request("PUT", url.path, "version=%s" % (version or ""))
+        if data:
+            if version:
+                body = "version=%s&data=%s" % (version, data)
+            else:
+                body = "data=%s" % data
+        else:
+            body = "version=%s" % (version or "")
+        log.debug("PUT body: %s", body)
+        if use_header:
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        else:
+            headers = {}
+        http.request("PUT", url.path, body, headers)
         resp = http.getresponse()
         log.debug("PUT Response: %s", resp.read())
         eq_(resp.status, 200)
@@ -101,7 +114,7 @@ class Client(object):
         try:
             return json.loads(self.ws.recv())
         except:
-            return {}
+            return None
 
     def ping(self):
         log.debug("Send: %s", "{}")
