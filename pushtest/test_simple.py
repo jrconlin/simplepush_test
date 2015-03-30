@@ -1,11 +1,12 @@
 import os
+import time
 
 from nose.tools import eq_, ok_
 
 from pushtest.client import (
-    Client,
     quick_register
 )
+
 
 def check_environ():
     return os.environ.get("PUSH_SERVER")
@@ -17,7 +18,7 @@ def test_delivery_while_disconnected(url=None):
     client.disconnect()
     ok_(client.channels)
     chan = client.channels.keys()[0]
-    client.send_notification()
+    client.send_notification(status=202)
     client.connect()
     client.hello()
     result = client.get_notification()
@@ -32,7 +33,7 @@ def test_delivery_repeat_without_ack(url=None):
     client.disconnect()
     ok_(client.channels)
     chan = client.channels.keys()[0]
-    client.send_notification()
+    client.send_notification(status=202)
     client.connect()
     client.hello()
     result = client.get_notification()
@@ -55,7 +56,7 @@ def test_dont_deliver_acked(url=None):
     client.disconnect()
     ok_(client.channels)
     chan = client.channels.keys()[0]
-    client.send_notification()
+    client.send_notification(status=202)
     client.connect()
     client.hello()
     result = client.get_notification()
@@ -63,6 +64,7 @@ def test_dont_deliver_acked(url=None):
     eq_(update["channelID"], chan)
     client.ack(chan, update["version"])
     client.disconnect()
+    time.sleep(0.2)
     client.connect()
     client.hello()
     result = client.get_notification()
@@ -75,7 +77,7 @@ def test_no_delivery_to_unregistered(url=None):
     client.disconnect()
     ok_(client.channels)
     chan = client.channels.keys()[0]
-    client.send_notification()
+    client.send_notification(status=202)
     client.connect()
     client.hello()
     result = client.get_notification()

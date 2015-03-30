@@ -4,11 +4,9 @@ import uuid
 import httplib
 import urlparse
 import random
-import time
 import logging
-import os
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +35,8 @@ class Client(object):
             chans = self.channels.keys()
         else:
             chans = []
-        msg = json.dumps(dict(messageType="hello", uaid=self.uaid or "", channelIDs=chans))
+        msg = json.dumps(dict(messageType="hello", uaid=self.uaid or "",
+                              channelIDs=chans))
         log.debug("Send: %s", msg)
         self.ws.send(msg)
         result = json.loads(self.ws.recv())
@@ -70,7 +69,7 @@ class Client(object):
         return result
 
     def send_notification(self, channel=None, version=None, data=None,
-                          use_header=True):
+                          use_header=True, status=200):
         if not self.channels:
             raise Exception("No channels registered.")
 
@@ -88,10 +87,7 @@ class Client(object):
         else:
             http = httplib.HTTPConnection(url.netloc)
         if data:
-            if version:
-                body = "version=%s&data=%s" % (version, data)
-            else:
-                body = "data=%s" % data
+            body = "version=%s&data=%s" % (version or "", data)
         else:
             body = "version=%s" % (version or "")
         log.debug("PUT body: %s", body)
@@ -102,7 +98,7 @@ class Client(object):
         http.request("PUT", url.path, body, headers)
         resp = http.getresponse()
         log.debug("PUT Response: %s", resp.read())
-        eq_(resp.status, 200)
+        eq_(resp.status, status)
 
         # Pull the notification if connect
         if self.ws and self.ws.connected:
@@ -125,7 +121,9 @@ class Client(object):
         return result
 
     def ack(self, channel, version):
-        msg = json.dumps(dict(messageType="ack", updates=[dict(channelID=channel, version=version)]))
+        msg = json.dumps(dict(messageType="ack",
+                              updates=[dict(channelID=channel,
+                                            version=version)]))
         log.debug("Send: %s", msg)
         self.ws.send(msg)
 
