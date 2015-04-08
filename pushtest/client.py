@@ -105,8 +105,8 @@ class Client(object):
             result = json.loads(self.ws.recv())
             return result
 
-    def get_notification(self):
-        self.ws.settimeout(0.2)
+    def get_notification(self, timeout=0.2):
+        self.ws.settimeout(timeout)
         try:
             return json.loads(self.ws.recv())
         except:

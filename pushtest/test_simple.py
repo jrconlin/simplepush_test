@@ -50,6 +50,23 @@ def test_delivery_repeat_without_ack(url=None):
     eq_(result["updates"][0]["channelID"], chan)
 
 
+def test_direct_delivery_without_ack(url=None):
+    url = url or check_environ()
+    client = quick_register(url)
+    result = client.send_notification()
+    ok_(result != {})
+    client.disconnect()
+    client.connect()
+    client.hello()
+    result2 = client.get_notification(timeout=5)
+    ok_(result2 != {})
+    update1 = result["updates"][0]
+    if 'data' in update1:
+        del update1["data"]
+    update2 = result2["updates"][0]
+    eq_(update1, update2)
+
+
 def test_dont_deliver_acked(url=None):
     url = url or check_environ()
     client = quick_register(url)
