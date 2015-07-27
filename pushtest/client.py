@@ -101,6 +101,7 @@ class Client(object):
                 "Encryption": self._crypto_key,
             }
             body = data or ""
+            method = "POST"
         else:
             if data:
                 body = "version=%s&data=%s" % (version or "", data)
@@ -110,11 +111,12 @@ class Client(object):
                 headers = {"Content-Type": "application/x-www-form-urlencoded"}
             else:
                 headers = {}
+            method = "PUT"
 
-        log.debug("PUT body: %s", body)
-        http.request("PUT", url.path, body, headers)
+        log.debug("%s body: %s", method, body)
+        http.request(method, url.path, body, headers)
         resp = http.getresponse()
-        log.debug("PUT Response: %s", resp.read())
+        log.debug("%s Response: %s", method, resp.read())
         eq_(resp.status, status)
 
         # Pull the notification if connected
