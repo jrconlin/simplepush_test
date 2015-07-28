@@ -120,6 +120,8 @@ class Client(object):
         resp = http.getresponse()
         log.debug("%s Response: %s", method, resp.read())
         eq_(resp.status, status)
+        if self.use_webpush:
+            assert(resp.getheader("Location", None) is not None)
 
         # Pull the notification if connected
         if self.ws and self.ws.connected:
