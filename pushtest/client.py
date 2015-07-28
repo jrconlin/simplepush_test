@@ -37,12 +37,11 @@ class Client(object):
             chans = self.channels.keys()
         else:
             chans = []
+        hello_dict = dict(messageType="hello", uaid=self.uaid or "",
+                          channelIDs=chans)
         if self.use_webpush:
-            msg = json.dumps(dict(messageType="hello", uaid=self.uaid or "",
-                                  use_webpush=True, channelIDs=chans))
-        else:
-            msg = json.dumps(dict(messageType="hello", uaid=self.uaid or "",
-                                  channelIDs=chans))
+            hello_dict["use_webpush"] = True
+        msg = json.dumps(hello_dict)
         log.debug("Send: %s", msg)
         self.ws.send(msg)
         result = json.loads(self.ws.recv())
