@@ -156,6 +156,7 @@ def test_no_delivery_to_unregistered(url=None):
 
     client.unregister(chan)
     client.disconnect()
+    time.sleep(1)
     client.connect()
     client.hello()
     result = client.get_notification()
