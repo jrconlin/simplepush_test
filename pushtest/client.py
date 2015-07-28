@@ -11,8 +11,8 @@ from nose.tools import eq_
 log = logging.getLogger(__name__)
 
 
-def quick_register(url):
-    client = Client(url)
+def quick_register(url, use_webpush=False):
+    client = Client(url, use_webpush=use_webpush)
     client.connect()
     client.hello()
     client.register()
@@ -20,11 +20,13 @@ def quick_register(url):
 
 
 class Client(object):
-    def __init__(self, url):
+    def __init__(self, url, use_webpush=False):
         self.url = url
         self.uaid = None
         self.ws = None
+        self.use_webpush = use_webpush
         self.channels = {}
+        self._crypto_key = 'keyid="http://example.org/bob/keys/123;salt="XZwpw6o37R-6qoZjw6KwAw"'
 
     def connect(self):
         self.ws = websocket.create_connection(self.url)
@@ -35,8 +37,11 @@ class Client(object):
             chans = self.channels.keys()
         else:
             chans = []
-        msg = json.dumps(dict(messageType="hello", uaid=self.uaid or "",
-                              channelIDs=chans))
+        hello_dict = dict(messageType="hello", uaid=self.uaid or "",
+                          channelIDs=chans)
+        if self.use_webpush:
+            hello_dict["use_webpush"] = True
+        msg = json.dumps(hello_dict)
         log.debug("Send: %s", msg)
         self.ws.send(msg)
         result = json.loads(self.ws.recv())
@@ -47,6 +52,7 @@ class Client(object):
             self.channels = {}
         self.uaid = result["uaid"]
         eq_(result["status"], 200)
+        return result
 
     def register(self, chid=None):
         chid = chid or str(uuid.uuid4())
@@ -86,21 +92,37 @@ class Client(object):
             http = httplib.HTTPSConnection(url.netloc)
         else:
             http = httplib.HTTPConnection(url.netloc)
-        if data:
-            body = "version=%s&data=%s" % (version or "", data)
-        else:
-            body = "version=%s" % (version or "")
-        log.debug("PUT body: %s", body)
-        if use_header:
-            headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        else:
-            headers = {}
-        http.request("PUT", url.path, body, headers)
-        resp = http.getresponse()
-        log.debug("PUT Response: %s", resp.read())
-        eq_(resp.status, status)
 
-        # Pull the notification if connect
+        if self.use_webpush:
+            headers = {
+                "Content-Type": "application/octet-stream",
+                "Content-Encoding": "aesgcm-128",
+                "Encryption": self._crypto_key,
+                "Encryption-Key": 'keyid="a1"; key="JcqK-OLkJZlJ3sJJWstJCA"'
+            }
+            body = data or ""
+            method = "POST"
+            status = 201
+        else:
+            if data:
+                body = "version=%s&data=%s" % (version or "", data)
+            else:
+                body = "version=%s" % (version or "")
+            if use_header:
+                headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            else:
+                headers = {}
+            method = "PUT"
+
+        log.debug("%s body: %s", method, body)
+        http.request(method, url.path, body, headers)
+        resp = http.getresponse()
+        log.debug("%s Response: %s", method, resp.read())
+        eq_(resp.status, status)
+        if self.use_webpush:
+            assert(resp.getheader("Location", None) is not None)
+
+        # Pull the notification if connected
         if self.ws and self.ws.connected:
             result = json.loads(self.ws.recv())
             return result
