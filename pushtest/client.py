@@ -99,9 +99,11 @@ class Client(object):
                 "Content-Type": "application/octet-stream",
                 "Content-Encoding": "aesgcm-128",
                 "Encryption": self._crypto_key,
+                "Encryption-Key": 'keyid="a1"; key="JcqK-OLkJZlJ3sJJWstJCA"'
             }
             body = data or ""
             method = "POST"
+            status = 201
         else:
             if data:
                 body = "version=%s&data=%s" % (version or "", data)
