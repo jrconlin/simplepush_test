@@ -75,7 +75,7 @@ class Client(object):
         return result
 
     def send_notification(self, channel=None, version=None, data=None,
-                          use_header=True, status=200):
+                          use_header=True, status=200, ttl=200):
         if not self.channels:
             raise Exception("No channels registered.")
 
@@ -98,7 +98,8 @@ class Client(object):
                 "Content-Type": "application/octet-stream",
                 "Content-Encoding": "aesgcm-128",
                 "Encryption": self._crypto_key,
-                "Encryption-Key": 'keyid="a1"; key="JcqK-OLkJZlJ3sJJWstJCA"'
+                "Encryption-Key": 'keyid="a1"; key="JcqK-OLkJZlJ3sJJWstJCA"',
+                "TTL": str(ttl),
             }
             body = data or ""
             method = "POST"
@@ -119,7 +120,7 @@ class Client(object):
         resp = http.getresponse()
         log.debug("%s Response: %s", method, resp.read())
         eq_(resp.status, status)
-        if self.use_webpush:
+        if self.use_webpush and ttl != 0:
             assert(resp.getheader("Location", None) is not None)
 
         # Pull the notification if connected
