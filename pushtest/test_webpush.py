@@ -161,3 +161,38 @@ def test_no_delivery_to_unregistered(url=None):
     client.hello()
     result = client.get_notification()
     eq_(result, None)
+
+
+def test_ttl_0_connected(url=None):
+    data = str(uuid.uuid4())
+    url = url or check_environ()
+    client = quick_register(url, use_webpush=True)
+    result = client.send_notification(data=data, ttl=0)
+    eq_(result["headers"]["encryption"], client._crypto_key)
+    eq_(result["data"], data)
+    eq_(result["messageType"], "notification")
+
+
+def test_ttl_0_not_connected(url=None):
+    data = str(uuid.uuid4())
+    url = url or check_environ()
+    client = quick_register(url, use_webpush=True)
+    client.disconnect()
+    client.send_notification(data=data, ttl=0)
+    client.connect()
+    client.hello()
+    result = client.get_notification()
+    eq_(result, None)
+
+
+def test_ttl_expired(url=None):
+    data = str(uuid.uuid4())
+    url = url or check_environ()
+    client = quick_register(url, use_webpush=True)
+    client.disconnect()
+    client.send_notification(data=data, ttl=1)
+    time.sleep(1.5)
+    client.connect()
+    client.hello()
+    result = client.get_notification()
+    eq_(result, None)
