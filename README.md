@@ -1,3 +1,11 @@
+# NOTE
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+This package is considered ***OBSOLETE***  and is no longer supported
+or maintained.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 This is a simple test harness for the pushgo server.
 
 This test harness is designed to exercise the server functions.
