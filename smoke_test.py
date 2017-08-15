@@ -23,7 +23,7 @@ def on_close(ws):
 
 
 def on_error(ws, error):
-    print "## Error:: " + error
+    print "## Error:: " + str(error)
     exit()
 
 
@@ -129,7 +129,8 @@ def state_machine(ws):
 
 def check_hello(msg):
     try:
-        assert msg.get("uaid") == uaid
+        assert "uaid" in msg
+        uaid == msg['uaid']
     except AssertionError, e:
         print e
         exit("Hello failed check")
@@ -164,7 +165,7 @@ def send_rest_alert(ws):
     if url.scheme == "https":
         http = httplib.HTTPSConnection(url.netloc)
     else:
-    http = httplib.HTTPConnection(url.netloc)
+        http = httplib.HTTPConnection(url.netloc)
     http.set_debuglevel(10)
     http.request("PUT", url.path, "version=" + version)
     print "#>> "
